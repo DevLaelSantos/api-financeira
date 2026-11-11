@@ -1,0 +1,18 @@
+# Ambiente Virtual
+venv/
+
+# Variáveis de Ambiente (Chaves Secretas)
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Banco de Dados local
+*.db
+*.sqlite3
+
+# IDE (VS Code)
+.vscode/
