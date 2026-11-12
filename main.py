@@ -4,6 +4,7 @@ from app.core.config import settings
 from app.core.database import engine, Base
 from app.models import user, transaction # Importa os modelos para o SQLAlchemy reconhecer
 from app.api.v1 import health, auth, transactions # Adicione o transactions
+from fastapi.middleware.cors import CORSMiddleware
 
 # 1. Cria a instância do FastAPI PRIMEIRO
 app = FastAPI(
@@ -11,6 +12,16 @@ app = FastAPI(
     version=settings.VERSION,
     description="API para gerenciamento financeiro pessoal."
 )
+
+# --- CONFIGURAÇÃO DO CORS ---
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # Em produção, troque "*" pela URL do seu frontend
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+# ----------------------------
 
 # 2. Cria as tabelas no banco de dados (se não existirem)
 Base.metadata.create_all(bind=engine)

@@ -3,11 +3,12 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
+# Agora o Python deve encontrar o app
+
 from app.main import app
 from app.core.database import Base
 from app.core.deps import get_db
-
-# ... (resto do código do conftest) ...
 
 # Cria um banco de dados SQLite em memória para os testes
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
