@@ -89,4 +89,8 @@
 * - Entregável: Link público da API rodando com o Swagger (/docs) acessível.
 
 *
-* -->
+* --> 
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0ZUBmaW5hbmNlaXJhLmNvbSIsImV4cCI6MTc5NDQ1NzY5M30.DD2x970VnFyFrRh2vIxBilNFIi20VMKkI_2Ggr_fFHA",
+  "token_type": "bearer"
+}

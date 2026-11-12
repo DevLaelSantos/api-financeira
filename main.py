@@ -3,6 +3,7 @@ from app.api.v1 import health, auth # Importa as rotas
 from app.core.config import settings
 from app.core.database import engine, Base
 from app.models import user, transaction # Importa os modelos para o SQLAlchemy reconhecer
+from app.api.v1 import health, auth, transactions # Adicione o transactions
 
 # 1. Cria a instância do FastAPI PRIMEIRO
 app = FastAPI(
@@ -17,6 +18,7 @@ Base.metadata.create_all(bind=engine)
 # 3. Registra as rotas (Agora o 'app' já existe, então não vai dar erro)
 app.include_router(health.router, prefix="/api/v1", tags=["Health"])
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Autenticação"])
+app.include_router(transactions.router, prefix="/api/v1/transactions", tags=["Transações"]) # Nova rota
 
 @app.get("/")
 def read_root():
