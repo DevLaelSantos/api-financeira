@@ -1,6 +1,15 @@
 from fastapi import FastAPI
 from app.api.v1 import health
 from app.core.config import settings
+# ... imports anteriores ...
+from app.core.database import engine, Base
+# Importe os modelos aqui para que o SQLAlchemy os reconheça
+from app.models import user, transaction 
+
+# Cria as tabelas no banco de dados (se não existirem)
+Base.metadata.create_all(bind=engine)
+
+# ... resto do código do main.py ...
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
