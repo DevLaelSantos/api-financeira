@@ -1,24 +1,22 @@
 from fastapi import FastAPI
-from app.api.v1 import health
+from app.api.v1 import health, auth # Importa as rotas
 from app.core.config import settings
-# ... imports anteriores ...
 from app.core.database import engine, Base
-# Importe os modelos aqui para que o SQLAlchemy os reconheça
-from app.models import user, transaction 
+from app.models import user, transaction # Importa os modelos para o SQLAlchemy reconhecer
 
-# Cria as tabelas no banco de dados (se não existirem)
-Base.metadata.create_all(bind=engine)
-
-# ... resto do código do main.py ...
-
+# 1. Cria a instância do FastAPI PRIMEIRO
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
     description="API para gerenciamento financeiro pessoal."
 )
 
-# Registrando as rotas
+# 2. Cria as tabelas no banco de dados (se não existirem)
+Base.metadata.create_all(bind=engine)
+
+# 3. Registra as rotas (Agora o 'app' já existe, então não vai dar erro)
 app.include_router(health.router, prefix="/api/v1", tags=["Health"])
+app.include_router(auth.router, prefix="/api/v1/auth", tags=["Autenticação"])
 
 @app.get("/")
 def read_root():
