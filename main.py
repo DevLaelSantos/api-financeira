@@ -8,6 +8,9 @@ from fastapi.middleware.cors import CORSMiddleware
 import time
 from sqlalchemy.exc import OperationalError
 
+# todo DEUBG URL DATABASE
+from app.core.config import settings 
+
 # 1. Cria a instância do FastAPI PRIMEIRO
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -46,3 +49,7 @@ app.include_router(transactions.router, prefix="/api/v1/transactions", tags=["Tr
 @app.get("/")
 def read_root():
     return {"message": "Bem-vindo à API Financeira. Acesse /docs para a documentação."}
+
+@app.get("/debug")
+def debug_db():
+    return {"database_url": settings.DATABASE_URL}
