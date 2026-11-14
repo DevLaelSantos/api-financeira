@@ -5,6 +5,8 @@ from app.core.database import engine, Base
 from app.models import user, transaction # Importa os modelos para o SQLAlchemy reconhecer
 from app.api.v1 import health, auth, transactions # Adicione o transactions
 from fastapi.middleware.cors import CORSMiddleware
+import time
+from sqlalchemy.exc import OperationalError
 
 # 1. Cria a instância do FastAPI PRIMEIRO
 app = FastAPI(
@@ -24,7 +26,17 @@ app.add_middleware(
 # ----------------------------
 
 # 2. Cria as tabelas no banco de dados (se não existirem)
-Base.metadata.create_all(bind=engine)
+# Base.metadata.create_all(bind=engine) -> substituido
+
+# Tenta criar as tabelas até 5 vezes, esperando 3 segundos entre as tentativas
+for i in range(5):
+    try:
+        Base.metadata.create_all(bind=engine)
+        print("✅ Tabelas criadas com sucesso!")
+        break
+    except OperationalError as e:
+        print(f"⏳ Banco ainda não está pronto (tentativa {i+1}/5). Aguardando 3s...")
+        time.sleep(3)
 
 # 3. Registra as rotas (Agora o 'app' já existe, então não vai dar erro)
 app.include_router(health.router, prefix="/api/v1", tags=["Health"])
