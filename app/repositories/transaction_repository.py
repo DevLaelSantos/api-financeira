@@ -20,3 +20,7 @@ class TransactionRepository:
 
     def get_by_user(self, user_id: int):
         return self.db.query(Transaction).filter(Transaction.owner_id == user_id).all()
+    
+    def delete(self, transaction: Transaction):
+        self.db.delete(transaction)
+        self.db.commit()
