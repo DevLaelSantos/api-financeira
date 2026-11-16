@@ -1,4 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field
+from typing import Optional
 
 # Schema base (dados que vêm na requisição)
 class UserCreate(BaseModel):
@@ -13,3 +14,7 @@ class UserResponse(BaseModel):
 
     class Config:
         from_attributes = True # Permite ler dados do SQLAlchemy
+
+class UserUpdate(BaseModel):
+    email: Optional[EmailStr] = None
+    password: Optional[str] = Field(None, min_length=8, description="A senha deve ter no mínimo 8 caracteres")

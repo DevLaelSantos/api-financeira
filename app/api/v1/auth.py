@@ -3,8 +3,10 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from app.core.database import SessionLocal
 from app.models.user import User
-from app.schemas.user import UserCreate, UserResponse
+from app.schemas.user import UserCreate, UserResponse, UserUpdate # <-- Adicionado o UserUpdate
 from app.core.security import gerar_hash_senha, verificar_senha, criar_token_acesso
+from app.core.deps import get_current_user # <-- Import o get_current_user
+from app.models.transaction import Transaction
 
 router = APIRouter()
 
@@ -15,6 +17,7 @@ def get_db():
     finally:
         db.close()
 
+# * Rota de Registrar
 @router.post("/register", response_model=UserResponse)
 def register(user: UserCreate, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.email == user.email).first()
@@ -28,6 +31,7 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     db.refresh(new_user)
     return new_user
 
+# * Rota de Login
 # A MUDANÇA ESTÁ AQUI: Agora o login aceita formulário (para o Swagger) ou JSON
 @router.post("/login")
 def login(
@@ -45,3 +49,47 @@ def login(
     
     access_token = criar_token_acesso(data={"sub": db_user.email})
     return {"access_token": access_token, "token_type": "bearer"}
+
+# * Rota Listagem de Usuario Logado
+@router.get("/me", response_model=UserResponse)
+def get_me(current_user: User = Depends(get_current_user)):
+    """Retorna os dados do usuário logado."""
+    return current_user
+
+# * Rota Update -> Atualiza Usuario
+@router.put("/me", response_model=UserResponse)
+def update_me(
+    user_update: UserUpdate, 
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(get_current_user)
+):
+    """Atualiza o e-mail ou a senha do usuário logado."""
+    # Verifica se o novo e-mail já está em uso por outro usuário
+    if user_update.email and user_update.email != current_user.email:
+        db_user = db.query(User).filter(User.email == user_update.email).first()
+        if db_user:
+            raise HTTPException(status_code=400, detail="E-mail já cadastrado por outro usuário.")
+        current_user.email = user_update.email
+
+    # Atualiza a senha (se fornecida)
+    if user_update.password:
+        current_user.hashed_password = gerar_hash_senha(user_update.password)
+
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
+# * Rota Delete Usuario
+@router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
+def delete_me(
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(get_current_user)
+):
+    """Exclui a conta do usuário logado e todas as suas transações."""
+    # Exclui todas as transações do usuário primeiro (para evitar erro de chave estrangeira)
+    db.query(Transaction).filter(Transaction.owner_id == current_user.id).delete()
+    
+    # Exclui o usuário
+    db.delete(current_user)
+    db.commit()
+    return None
