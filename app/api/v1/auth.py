@@ -63,21 +63,26 @@ def update_me(
     db: Session = Depends(get_db), 
     current_user: User = Depends(get_current_user)
 ):
-    """Atualiza o e-mail ou a senha do usuário logado."""
-    # Verifica se o novo e-mail já está em uso por outro usuário
-    if user_update.email and user_update.email != current_user.email:
-        db_user = db.query(User).filter(User.email == user_update.email).first()
-        if db_user:
+    # 1. Busca o usuário NOVAMENTE na sessão ativa do banco
+    db_user = db.query(User).filter(User.id == current_user.id).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado.")
+
+    # 2. Verifica se o novo e-mail já está em uso
+    if user_update.email and user_update.email != db_user.email:
+        existing = db.query(User).filter(User.email == user_update.email).first()
+        if existing:
             raise HTTPException(status_code=400, detail="E-mail já cadastrado por outro usuário.")
-        current_user.email = user_update.email
+        db_user.email = user_update.email
 
-    # Atualiza a senha (se fornecida)
+    # 3. Atualiza a senha
     if user_update.password:
-        current_user.hashed_password = gerar_hash_senha(user_update.password)
+        db_user.hashed_password = gerar_hash_senha(user_update.password)
 
+    # 4. Salva as alterações
     db.commit()
-    db.refresh(current_user)
-    return current_user
+    db.refresh(db_user)
+    return db_user
 
 # * Rota Delete Usuario
 @router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
