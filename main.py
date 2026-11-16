@@ -7,6 +7,7 @@ from app.api.v1 import health, auth, transactions # Adicione o transactions
 from fastapi.middleware.cors import CORSMiddleware
 import time
 from sqlalchemy.exc import OperationalError
+from app.api.v1 import health, auth, transactions, admin # <-- Importe o admin
 
 # todo DEUBG URL DATABASE
 from app.core.config import settings 
@@ -44,7 +45,8 @@ for i in range(5):
 # 3. Registra as rotas (Agora o 'app' já existe, então não vai dar erro)
 app.include_router(health.router, prefix="/api/v1", tags=["Health"])
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["Autenticação"])
-app.include_router(transactions.router, prefix="/api/v1/transactions", tags=["Transações"]) # Nova rota
+app.include_router(transactions.router, prefix="/api/v1/transactions", tags=["Transações"])
+app.include_router(admin.router, prefix="/api/v1/admin", tags=["Admin"])
 
 @app.get("/")
 def read_root():
