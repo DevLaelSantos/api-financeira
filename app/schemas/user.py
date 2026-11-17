@@ -12,7 +12,7 @@ class UserResponse(BaseModel):
     email: EmailStr
     is_active: bool
     is_admin: bool
-    is_plan: str
+    plan: str
 
     class Config:
         from_attributes = True # Permite ler dados do SQLAlchemy
