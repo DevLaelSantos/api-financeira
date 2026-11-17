@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
+from datetime import datetime
 
 # Schema base (dados que vêm na requisição)
 class UserCreate(BaseModel):
@@ -13,6 +14,7 @@ class UserResponse(BaseModel):
     is_active: bool
     is_admin: bool
     plan: str
+    created_at: datetime # <-- NOVO CAMPO
 
     class Config:
         from_attributes = True # Permite ler dados do SQLAlchemy
