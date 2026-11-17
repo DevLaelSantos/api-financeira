@@ -4,6 +4,7 @@ from typing import List
 from app.core.deps import get_db, get_current_admin
 from app.models.user import User
 from app.schemas.user import UserResponse
+from pydantic import BaseModel
 
 router = APIRouter()
 
@@ -29,3 +30,24 @@ def delete_user_by_admin(
     db.delete(user)
     db.commit()
     return None
+
+# * PLANOS DE ASSINATURAS
+class PlanUpdate(BaseModel):
+    plan: str
+
+@router.put("/users/{user_id}/plan", response_model=UserResponse)
+def update_user_plan(
+    user_id: int,
+    plan_update: PlanUpdate,
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_current_admin)
+):
+    """Permite ao admin alterar o plano de um usuário."""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado.")
+    
+    user.plan = plan_update.plan
+    db.commit()
+    db.refresh(user)
+    return user
