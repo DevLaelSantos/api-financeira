@@ -51,3 +51,21 @@ def update_user_plan(
     db.commit()
     db.refresh(user)
     return user
+
+# * ROTA DE ATIVAÇÃO DE CLIENTES
+@router.patch("/users/{user_id}/toggle-active", response_model=UserResponse)
+def toggle_user_active(
+    user_id: int,
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_current_admin)
+):
+    """Ativa ou desativa a conta de um usuário (Apenas Admin)."""
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado.")
+    
+    # Inverte o status (se era true, vira false, e vice-versa)
+    user.is_active = not user.is_active
+    db.commit()
+    db.refresh(user)
+    return user
