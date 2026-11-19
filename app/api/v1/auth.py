@@ -36,7 +36,7 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="E-mail já cadastrado")
     
     hashed_password = gerar_hash_senha(user.password)
-    new_user = User(email=user.email, hashed_password=hashed_password)
+    new_user = User(email=user.email, hashed_password=hashed_password, is_active=False)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
