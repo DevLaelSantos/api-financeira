@@ -56,6 +56,13 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="E-mail ou senha incorretos"
         )
+
+        # ... dentro do login, após verificar a senha ...
+    if not db_user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Sua conta está pendente de aprovação ou foi desativada. Entre em contato com o suporte."
+        )
     
     access_token = criar_token_acesso(data={"sub": db_user.email})
     return {"access_token": access_token, "token_type": "bearer"}
